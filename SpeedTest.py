@@ -12,31 +12,45 @@ class SpeedTest():
      new.update(num_calls=0)
      new.update(dts = [])
      self.functions[fun.__name__] = new
+
   def has_function(self,fun):
      if fun.__name__ in self.functions:
         return 1
      self.add_function(fun)
      print(fun.__name__)
+
   def add_time(self,fun,t):
-     self.has_function(fun)
      self.functions[fun.__name__]['dts'].append(t)
+
   def stats(self):
      fig = plt.figure()
      ax = fig.add_subplot(111)
-     #num_keys = len(self.functions.keys())
+     units = ["s","ms","µs","ns"]
+     num_keys = len(self.functions.keys())
      for n,key in enumerate(self.functions.keys()):
-        print(key)
-        t = time()
-        dts = np.array(self.functions[key]['dts'])
-        print(time()-t,"um das in ein array umzuwandeln")
-        #TODO the thing with the plotting seems to be unpractical. Better check if the fist run is way longer than the
-        #TODO other runs, but this will just indicate the use of jit
-        #if len(dts)> num_keys:
-          #if dts.max() > 2* dts.min():
-             #if len(dts)>100:
-               #plt.figure().add_subplot().bar(np.arange(100),dts[:100])
-
-        #print(*self.functions[key]['dts'])
+        dts = np.array(self.functions[key]['dts']).astype("float32")
+        print("Function {}".format(key))
+        if len(dts)>num_keys:
+            #todo you can do this nicer! and shorter
+            umax=umin=umean=0
+            dtmin = dts.min()
+            if dtmin > 0:
+              while dtmin < 0.1:
+                dtmin*=1000
+                umin+=1
+            dtmax = dts.max()
+            if dtmax:
+              while dtmax < 0.1:
+                dtmax *= 1000
+                umax+=1
+            dtmean = dts.mean()
+            if dts[0]>5*dtmean:
+                print("Numba detected!")
+            if dtmean:
+              while dtmean < 0.1:
+                dtmean *= 1000
+                umean+=1
+            print("Num runs: {}\n total time: {:.2f}\n max: {:.2f} {}\n min: {:.2f} {}\n mean: {:.2f} {}\n\n".format(len(dts),dts.sum(),dtmax,units[umax],dtmin,units[umin],dtmean,units[umean]))
         ax.bar(n,np.sum(dts))
      ax.set_xticks(range(len(self.functions.keys())))
      ax.set_xticklabels(self.functions.keys(),rotation=90)
@@ -47,15 +61,14 @@ class SpeedTest():
 def time_runtime(function):
     def wrapper(*args, **kwargs):
         if function.__name__ == 'main':
-           print("Start der Main function")
+           print("Start of Main function")
+        SpeedTest().has_function(function)
         start = time()
         result = function(*args, **kwargs)
-        end = time()
-        diff = end-start
-
-        SpeedTest().add_time(function,diff)  
+        diff = time()-start
+        SpeedTest().add_time(function,diff)
         if function.__name__ == 'main':
-           print("Ende der Main function")  
+           print("End of Main function after {:.2f} seconds".format(diff))
            SpeedTest().stats()
         return result
     return wrapper
