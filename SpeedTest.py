@@ -52,6 +52,8 @@ class SpeedTest():
                 dtmean *= 1000
                 umean+=1
             print("Num runs: {}\n total time: {:.2f} s\n max: {:.2f} {}\n min: {:.2f} {}\n mean: {:.2f} {}\n\n".format(len(dts),dts.sum(),dtmax,units[umax],dtmin,units[umin],dtmean,units[umean]))
+        else:
+            print("Num runs: {}\n total time: {}\n".format(len(dts),dts.sum()))
         ax.bar(n,np.sum(dts))
      ax.set_xticks(range(len(self.functions.keys())))
      ax.set_xticklabels(self.functions.keys(),rotation=90)
