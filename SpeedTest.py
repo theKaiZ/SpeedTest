@@ -4,7 +4,6 @@ import numpy as np
 
 class SpeedTest():
   functions = {}
-  no_main = True
   def __init__(self):
      pass
      
@@ -60,11 +59,11 @@ class SpeedTest():
      fig.tight_layout()
      fig.savefig("test.png")
 
+
 def time_runtime(function):
     def wrapper(*args, **kwargs):
         if function.__name__ == 'main':
             print("Start of Main function")
-            SpeedTest().no_main = False
         SpeedTest().has_function(function)
         start = time()
         result = function(*args, **kwargs)
@@ -73,7 +72,5 @@ def time_runtime(function):
         if function.__name__ == 'main':
            print("End of Main function after {:.2f} seconds".format(diff))
            SpeedTest().stats()
-        if SpeedTest().no_main:
-            print(function.__name__,diff,"Sekunden")
         return result
     return wrapper
