@@ -28,6 +28,7 @@ class SpeedTest():
      units = ["s","ms","µs","ns"]
      num_keys = len(self.functions.keys())
      for n,key in enumerate(self.functions.keys()):
+        is_numba = False
         dts = np.array(self.functions[key]['dts']).astype("float32")
         print("Function {}".format(key))
         if len(dts)>num_keys:
@@ -46,11 +47,17 @@ class SpeedTest():
             dtmean = dts.mean()
             if dts[0]>5*dtmean:
                 print("Numba detected!")
+                is_numba = True
+                numbamean = dts[1:].mean()
             if dtmean:
               while dtmean < 0.1:
+                if is_numba:
+                    numbamean *= 1000
                 dtmean *= 1000
                 umean+=1
-            print("Num runs: {}\n total time: {:.2f} s\n max: {:.2f} {}\n min: {:.2f} {}\n mean: {:.2f} {}\n\n".format(len(dts),dts.sum(),dtmax,units[umax],dtmin,units[umin],dtmean,units[umean]))
+            print("Num runs: {}\n total time: {:.2f} s\n max: {:.2f} {}\n min: {:.2f} {}\n mean: {:.2f} {}".format(len(dts),dts.sum(),dtmax,units[umax],dtmin,units[umin],dtmean,units[umean]))
+            if is_numba: print(" mean: {:.2f} {} (without first run)".format(numbamean,units[umean]))
+            print("\n")
         else:
             print("Num runs: {}\n total time: {}\n".format(len(dts),dts.sum()))
         ax.bar(n,np.sum(dts))
@@ -70,7 +77,7 @@ def time_runtime(function):
         diff = time()-start
         SpeedTest().add_time(function,diff)
         if function.__name__ == 'main':
-           print("End of Main function after {:.2f} seconds".format(diff))
            SpeedTest().stats()
+           print("End of Main function after {:.2f} seconds".format(diff))
         return result
     return wrapper
