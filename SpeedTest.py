@@ -64,7 +64,7 @@ class SpeedTest():
      ax.set_xticks(range(len(self.functions.keys())))
      ax.set_xticklabels(self.functions.keys(),rotation=90)
      fig.tight_layout()
-     fig.savefig("test.png")
+     fig.savefig("last_stats.png")
 
 
 def time_runtime(function):
@@ -79,5 +79,11 @@ def time_runtime(function):
         if function.__name__ == 'main':
            SpeedTest().stats()
            print("End of Main function after {:.2f} seconds".format(diff))
+           if len(SpeedTest().functions.keys()):
+               plt.show()
         return result
     return wrapper
+
+
+
+    
